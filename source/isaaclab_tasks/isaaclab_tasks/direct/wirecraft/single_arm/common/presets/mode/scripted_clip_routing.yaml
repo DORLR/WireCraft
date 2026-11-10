@@ -1,0 +1,3 @@
+# A routed wire is held 10 s after release, and a slot miss is picked up and set down up to four times;
+# 60 s ran out during that hold on the slowest retry.
+episode_length_s: 90.0

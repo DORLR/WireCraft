@@ -1,0 +1,11 @@
+# The scripted policy needs the full 6-DoF delta action and owns episode ends.
+fix_ee_orient: false
+action_scale: 1.0
+enable_terminations: false
+terminate_on_time_out: false
+terminate_on_success: false
+episode_length_s: 60.0
+wire:
+  randomize_xy: true
+  randomize_xy_range: [0.04, 0.04]
+  randomize_yaw: 0.2

@@ -1,0 +1,82 @@
+# Build
+**/cmake-build*/
+**/build*/
+**/*.so
+**/*.log*
+*.tmp
+*.pid
+
+# Python
+.DS_Store
+**/*.egg-info/
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/*.pb
+node_modules
+
+# USD assets: none in the repo, except the robots WireCraft packages (no official copy exists)
+**/*.usd
+!source/isaaclab_assets/isaaclab_assets/data/wirecraft/robots/*.usd
+**/*.usda
+**/*.usdc
+**/*.usdz
+
+# Isaac Sim / Omniverse
+_isaac_sim*
+_repo
+_build
+.lastformat
+**/*.dmp
+**/.thumbs
+
+# Docs: WireCraft pages, index, and third-party license notices
+docs/*
+!docs/README.md
+!docs/wirecraft/
+!docs/licenses/
+**/docs/_build/*
+**/generated/*
+
+# IDE and local agent state (the top-level .vscode configures VS Code and stays)
+**/.idea/
+**/.vscode/
+!.vscode
+.claude/
+
+# Run outputs, logs and checkpoints
+/out/
+**/output/*
+**/outputs/*
+**/videos/*
+**/runs/*
+**/logs/*
+**/recordings/*
+**/wandb/*
+**/.neptune/*
+*.pt
+/.pretrained_checkpoints/
+
+# Datasets
+/demos/
+datasets/
+camera_outputs/
+lerobot_dataset/
+
+# Tests
+tests/
+
+# Docker / Singularity
+**/*.sif
+docker/cluster/exports/
+docker/.container.cfg
+docker/artifacts/
+.isaac-lab-docker-history
+
+# CloudXR runtime state (regenerated each launch)
+openxr/run/*
+!openxr/run/.gitkeep
+runtime_started
+
+# Local scripts (not for version control)
+chay/

@@ -1,0 +1,4 @@
+wire:
+  kind: deformable
+fix_ee_orient: false
+action_scale: 0.01

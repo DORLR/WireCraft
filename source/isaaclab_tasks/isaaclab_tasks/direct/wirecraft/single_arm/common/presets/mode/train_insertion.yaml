@@ -1,0 +1,9 @@
+# Insertion resets as the v14.5 training runs drew them; train, random and scripted share them.
+wire:
+  randomize_xy: true
+  randomize_xy_range: [0.05, 0.15]
+  randomize_yaw: 0.6283     # 36 deg
+  randomize_tilt: 0.3142    # 18 deg of roll and of pitch
+  randomize_lift: [0.06, 0.11]
+task:
+  randomize_socket: true    # +/-0.14 m in Y, +/-0.075 m in Z

@@ -1,0 +1,6 @@
+fix_ee_orient: false
+action_scale: 1.0
+enable_terminations: false
+terminate_on_time_out: false
+terminate_on_success: false
+episode_length_s: 3600.0

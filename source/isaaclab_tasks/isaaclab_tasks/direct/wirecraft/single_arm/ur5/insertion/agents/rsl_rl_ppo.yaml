@@ -1,0 +1,9 @@
+# PPO settings of the UR5 insertion runs the v14.5 reward was trained with.
+num_steps_per_env: 128
+save_interval: 100
+policy:
+  actor_hidden_dims: [256, 128, 64]
+  critic_hidden_dims: [256, 128, 64]
+algorithm:
+  num_learning_epochs: 5
+  entropy_coef: 0.01

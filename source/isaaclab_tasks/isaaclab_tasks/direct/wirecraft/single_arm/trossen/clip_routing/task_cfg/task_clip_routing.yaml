@@ -1,0 +1,12 @@
+# UR5 layout scaled by 0.55 toward the Trossen arm: x -> 0.18 + 0.55 x (fixed at x = 0.4), y -> 0.55 y.
+# Connector, clip-slot and channel cross-sections keep their sizes.
+# x_min is not scaled: the home pose holds the grasp point at x = 0.35, so 0.4 ended every episode at once.
+ee_safe_zone: [0.3, 0.62, -0.1925, 0.1925, 0.75, 1.2]
+wire:
+  length: 0.22              # 0.4
+  # Not scaled: the port stops 5 cm short of the first clip as on the UR5, since the 6 cm jaws
+  # would otherwise land on the clip.
+  root_pos: [0.185, 0.0, 0.805]
+task:
+  clip_x_positions: [0.455, 0.5375, 0.3725]   # 0.50, 0.65, 0.35
+  clip_y_range: 0.033       # 0.06

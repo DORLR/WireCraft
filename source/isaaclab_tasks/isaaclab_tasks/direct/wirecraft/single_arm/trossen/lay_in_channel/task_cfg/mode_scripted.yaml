@@ -1,0 +1,10 @@
+# UR5 values scaled by 0.55.
+wire:
+  randomize_xy_range: [0.022, 0.022]   # 0.04, 0.04
+task:
+  x_range: 0.022            # 0.04
+  y_range: 0.055            # 0.1
+  # The default soft-wire swing pulls the port to about 0.34 m from the clamp on this 0.24 m wire;
+  # the arm stalls short of it. Carried at its length and lower, the wire still drops into the slot.
+  scripted_swing:
+    deformable: {slack: 0.0, height: 0.10, set_slack: 0.0}

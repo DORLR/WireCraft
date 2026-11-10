@@ -1,0 +1,11 @@
+fix_ee_orient: true
+action_scale: 0.5
+wire:
+  # The port rests short of the first clip, so a top-down pinch can't land on the clip.
+  root_pos: [0.05, 0.0, 0.805]
+# The gripper pinches the wire itself; an invisible ring, colliding with the wire only, keeps a pinched wire
+# from sliding out between small finger pads (see single_arm/common/wire_holder.py).
+wire_holder:
+  enabled: true
+# Parallel grippers close only to a gap just under the wire's width (robot.wire_gripper_closed_pos).
+gripper_close_on_wire: true

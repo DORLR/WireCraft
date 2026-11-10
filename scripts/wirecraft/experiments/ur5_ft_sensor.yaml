@@ -1,0 +1,5 @@
+# UR5 with a wrist force/torque sensor between flange and gripper (demo).
+# The wrench is env.arm.wrench and observations["ft"]; the policy observation is unchanged.
+env:
+  robot:
+    ft_sensor_body: gripper_base_link

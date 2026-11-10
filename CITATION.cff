@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: "If you use WireCraft, please cite the WireCraft paper. WireCraft builds on Isaac Lab; please also cite it."
+title: "WireCraft: A Simulation Benchmark for Industrial DLO Manipulation"
+type: software
+authors:
+  - family-names: Zhu
+    given-names: Chongyu
+  - family-names: ElMallah
+    given-names: Ramy
+  - family-names: Kim
+    given-names: Hyegang
+  - family-names: Tang
+    given-names: Zachary
+  - family-names: Rao
+    given-names: Jiachen
+  - family-names: Arutyunov
+    given-names: Artem
+  - family-names: Ha
+    given-names: Seungyeon
+  - family-names: Lee
+    given-names: Chi-Guhn
+repository-code: https://github.com/DORLR/WireCraft
+url: https://chongyuzhu.com/wirecraft/
+license: BSD-3-Clause
+preferred-citation:
+  type: article
+  title: "WireCraft: A Simulation Benchmark for Industrial DLO Manipulation"
+  authors:
+    - family-names: Zhu
+      given-names: Chongyu
+    - family-names: ElMallah
+      given-names: Ramy
+    - family-names: Kim
+      given-names: Hyegang
+    - family-names: Tang
+      given-names: Zachary
+    - family-names: Rao
+      given-names: Jiachen
+    - family-names: Arutyunov
+      given-names: Artem
+    - family-names: Ha
+      given-names: Seungyeon
+    - family-names: Lee
+      given-names: Chi-Guhn
+  year: 2026
+  journal: arXiv preprint
+  identifiers:
+    - type: other
+      value: "arXiv:2606.18097"
+  url: https://arxiv.org/abs/2606.18097
+  notes: "CoRL 2026 (Spotlight)"
+references:
+  - type: software
+    title: Isaac Lab
+    version: 2.2.1
+    authors:
+      - name: Isaac Lab Project Developers
+    repository-code: https://github.com/isaac-sim/IsaacLab
+    url: https://isaac-sim.github.io/IsaacLab/main/index.html
+    license: BSD-3-Clause

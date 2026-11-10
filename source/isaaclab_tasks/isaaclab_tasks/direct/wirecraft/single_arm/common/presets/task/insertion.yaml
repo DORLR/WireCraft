@@ -1,0 +1,14 @@
+# Task behavior shared by all robots. Deformable differences live in wire/.
+# The v14.5 reward scores the grasp orientation, so the policy commands the full 6-DoF pose.
+fix_ee_orient: false
+episode_length_s: 8.0
+# Holding a seated port keeps earning the bonus, so success does not end the episode.
+terminate_on_success: false
+# Random and RL actions stay stable only at this scale.
+action_scale: 0.01
+# The v14.5 runs reset an env only once a robot or wire joint passed 1e4 rad/s (or went non-finite).
+fault_joint_speed: 10000.0
+fault_port_speed: 10000.0
+wire:
+  # The trained cable spans x 0.1667-0.5667 at 0.85 m and drops onto the table at reset.
+  root_pos: [0.1667, 0.0, 0.85]

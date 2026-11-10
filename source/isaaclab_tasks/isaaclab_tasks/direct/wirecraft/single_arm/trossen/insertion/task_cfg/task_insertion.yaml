@@ -1,0 +1,13 @@
+# UR5 layout scaled by 0.55 toward the Trossen arm: x -> 0.18 + 0.55 x (fixed at x = 0.4), y -> 0.55 y.
+# Connector, clip-slot and channel cross-sections keep their sizes.
+# x_min is not scaled: the home pose holds the grasp point at x = 0.35, so 0.4 ended every episode at once.
+ee_safe_zone: [0.3, 0.62, -0.1925, 0.1925, 0.75, 1.2]
+wire:
+  length: 0.22              # 0.4
+  root_pos: [0.271685, 0.0, 0.805]   # x 0.1667; at the UR5 0.85 m the drop lands the cable on the arm
+task:
+  # Not scaled: 0.5485 left the port 66 mm short of the full-size socket, and a jaw closing beside a
+  # port next to a low, offset socket landed on the socket instead.
+  socket_pos_xy: [0.575, 0.0]      # 0.67
+  socket_y_range: 0.154     # 0.28
+  socket_z_range: 0.0825    # 0.15

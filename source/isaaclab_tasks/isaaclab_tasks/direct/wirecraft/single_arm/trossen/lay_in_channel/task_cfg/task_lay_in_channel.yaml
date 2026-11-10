@@ -1,0 +1,23 @@
+# UR5 layout scaled by 0.55 toward the Trossen arm: x -> 0.18 + 0.55 x (fixed at x = 0.4), y -> 0.55 y.
+# Connector, clip-slot and channel cross-sections keep their sizes.
+# x_min is not scaled: the home pose holds the grasp point at x = 0.35, so 0.4 ended every episode at once.
+ee_safe_zone: [0.3, 0.62, -0.1925, 0.1925, 0.75, 1.2]
+wire:
+  length: 0.22              # 0.4
+  # The wide plate jaws missed ports whose housing is filled with cable to the tip shoulder; the UR5-trained
+  # 15 mm only matters for the UR5 insertion policies.
+  port_cable_embed_depth: 0.008
+  root_pos: [0.2625, 0.0, 0.805]   # x 0.15
+task:
+  start_xy: [0.32025, 0.0]  # 0.255
+  module_scale: 0.55
+  x_range: 0.055            # 0.1
+  y_range: 0.055            # 0.1
+  far_straight: 0.033       # 0.06
+  far_bend: 0.055           # 0.10
+  # Lower than the 17 mm default: from 17 mm the short chain's first points stayed up to 1.3 mm above the walls.
+  far_entry_height: {articulation: 0.015}
+  # The UR5's 10 cm carry height on a 0.22 m chain leaves no reach: the chain goes taut and the arm shakes
+  # against it. Scaled like the layout, with a little more slack.
+  scripted_swing:
+    articulation: {height: 0.055, slack: 0.03}

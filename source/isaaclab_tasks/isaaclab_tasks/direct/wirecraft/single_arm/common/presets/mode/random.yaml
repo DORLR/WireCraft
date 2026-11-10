@@ -1,0 +1,6 @@
+# Uniform actions exercise reset paths; time-outs keep episodes bounded.
+enable_terminations: true
+terminate_on_time_out: true
+wire:
+  randomize_xy: true
+  randomize_yaw: 0.5
