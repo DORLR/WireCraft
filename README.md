@@ -6,27 +6,36 @@
 > (`scripts/wirecraft/configs/corl2026_act_insertion.yaml`), and a closed-loop LeRobot evaluator
 > (`scripts/wirecraft/eval_lerobot.py`).
 >
-> **Full guide, datasets, and exact commands:** [`docs/wirecraft/CORL2026_REPRO.md`](docs/wirecraft/CORL2026_REPRO.md).
+> **Full guide, datasets, checkpoints, and exact commands:** [`docs/wirecraft/CORL2026_REPRO.md`](docs/wirecraft/CORL2026_REPRO.md) ·
+> **HuggingFace Collection:** [`DORLR/WireCraft`](https://huggingface.co/collections/DORLR/wirecraft-6ac6955d8f31d72eff08d873).
 > For the latest benchmark environments and active development, see the [`main`](https://github.com/DORLR/WireCraft/tree/main) branch.
 
-### Quick Links — CoRL 2026 HuggingFace Datasets (LeRobot v3.0, 30 FPS, 7-D Joint Targets)
+### Quick Links — Published CoRL 2026 Datasets & Checkpoints (HuggingFace `DORLR`)
 
-- **Simulation IL/VLA:**
+> **Important:** Simulation checkpoints (`wirecraft-corl2026-sim-*`) and physical UR5 hardware checkpoints
+> (`wirecraft-corl2026-real-*`) are trained on different camera viewpoints/fixtures and are **not interchangeable**.
+> See [`docs/wirecraft/CORL2026_REPRO.md`](docs/wirecraft/CORL2026_REPRO.md) for the full 1-to-1 mapping of all 12 datasets and 20 checkpoints.
+
+- **Simulation IL/VLA Datasets (Tables 1–2, LeRobot v3.0, 30 FPS, 7-D Joint Targets):**
   - Connector Insertion (1,000 eps): [`DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1`](https://huggingface.co/datasets/DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1)
   - 1-Clip Routing (1,600 eps): [`DORLR/Deformable-1Clip-Routing-v0-Scripted-1600`](https://huggingface.co/datasets/DORLR/Deformable-1Clip-Routing-v0-Scripted-1600)
   - Straight-Channel Seating (1,000 eps): [`DORLR/Deformable-StraightChannel-v0-Scripted-1000-aug08-1`](https://huggingface.co/datasets/DORLR/Deformable-StraightChannel-v0-Scripted-1000-aug08-1)
-- **Real-World & Sim-to-Real Validation (Section 6 / Appendix Table `tab:real_data_sources`):**
-  - Insertion: [`ur5_camera_ready_insertion_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task) (50 real), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task_sim_rl) (200)
-  - 1-Clip Routing: [`ur5_camera_ready_routing_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task) (51 real), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task_sim_rl) (200)
-  - Straight-Channel Seating: [`ur5_camera_ready_seating_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task) (50 real), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task_sim_rl) (200)
+- **Simulation Checkpoints (Tables 1–2, use with `corl2026_*.yaml` presets):**
+  - Connector Insertion: [`sim-insertion-act`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-insertion-act) (100k), [`sim-insertion-diffusion`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-insertion-diffusion) (200k), [`sim-insertion-dit-vla`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-insertion-dit-vla) (200k), [`sim-insertion-pi05`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-insertion-pi05) (20k)
+  - 1-Clip Routing: [`sim-routing-act`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-routing-act) (100k), [`sim-routing-dit-vla`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-routing-dit-vla) (300k)
+  - Straight-Channel Seating: [`sim-seating-act`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-seating-act) (100k), [`sim-seating-dit-vla`](https://huggingface.co/DORLR/wirecraft-corl2026-sim-seating-dit-vla) (300k)
+- **Real-World & Sim-to-Real UR5 Camera-Ready Datasets & ACT Checkpoints (Section 6 / Figure 5 / Appendix G):**
+  - Insertion (`R` / `S` / `P` datasets): [`ur5_camera_ready_insertion_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task) (50), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task_sim_rl) (200) · ACT ckpts: [`real-insertion-act-{r,rs,rp,rsp}`](docs/wirecraft/CORL2026_REPRO.md#real-world-ur5-camera-ready-act-checkpoints-12-checkpoints--section-6-figure-5--appendix-g)
+  - 1-Clip Routing (`R` / `S` / `P` datasets): [`ur5_camera_ready_routing_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task) (51), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task_sim_rl) (200) · ACT ckpts: [`real-routing-act-{r,rs,rp,rsp}`](docs/wirecraft/CORL2026_REPRO.md#real-world-ur5-camera-ready-act-checkpoints-12-checkpoints--section-6-figure-5--appendix-g)
+  - Straight-Channel Seating (`R` / `S` / `P` datasets): [`ur5_camera_ready_seating_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task) (50), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task_sim_rl) (200) · ACT ckpts: [`real-seating-act-{r,rs,rp,rsp}`](docs/wirecraft/CORL2026_REPRO.md#real-world-ur5-camera-ready-act-checkpoints-12-checkpoints--section-6-figure-5--appendix-g)
 
-### Quick Start — Closed-Loop LeRobot ACT Evaluation
+### Quick Start — Closed-Loop Evaluation of the Published Paper ACT Checkpoint
 
 ```bash
 python scripts/wirecraft/eval_lerobot.py --headless \
   --task WireCraft-UR5-Deformable-StackedCuboid-Insertion-v0 \
   --experiment scripts/wirecraft/experiments/corl2026_insertion.yaml \
-  --checkpoint <path_or_hf_repo_id> \
+  --checkpoint DORLR/wirecraft-corl2026-sim-insertion-act \
   --lerobot_python /path/to/lerobot/bin/python \
   --num_envs 16 --seeds 1000,2000,3000,4000 --episode_length 800 \
   --output out/eval_corl2026_insertion.json
