@@ -1,0 +1,16 @@
+# CoRL 2026 paper reproduction preset for Straight-Channel Seating (UR5, FEM deformable).
+# Matches DORLR/Deformable-StraightChannel-v0-Scripted-1000-aug08-1 and the paper
+# evaluation overrides (Table 2 / Appendix F).
+#
+# Use with:
+#   --task WireCraft-UR5-Deformable-StackedCuboid-StraightChannel-v0
+#   --experiment scripts/wirecraft/experiments/corl2026_straight_channel.yaml
+env:
+  camera_resolution: 512
+  rerender_on_reset: true
+  task:
+    randomize_position: false
+    wire_yaw_range: [0.0, 0.45]
+    channel_color: [1.0, 0.0, 0.0]
+  connector:
+    port_color_override: [0.0, 0.0, 1.0]

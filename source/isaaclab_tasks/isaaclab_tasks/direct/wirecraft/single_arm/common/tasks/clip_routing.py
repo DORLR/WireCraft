@@ -128,6 +128,8 @@ class ClipRoutingCfg:
     num_clips: int = 1
     clip_x_positions: tuple[float, float, float] = (0.50, 0.65, 0.35)
     """Index 0 is first so a single clip sits within reach of the wire."""
+    clip_y_default: float = 0.0
+    """Default env-local Y coordinate for clip placement in meters (0.12 in CoRL 2026 paper datasets)."""
     distance_reward_scale: float = 1.0
 
     # Deep and long enough to wrap the wire over a long hold; the top gap is the difficulty knob.
@@ -173,7 +175,7 @@ class ClipRoutingCfg:
                     collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
                 ),
                 init_state=RigidObjectCfg.InitialStateCfg(
-                    pos=(self.clip_x_positions[i], 0.0, env_cfg.table_top_z), rot=(1.0, 0.0, 0.0, 0.0)
+                    pos=(self.clip_x_positions[i], self.clip_y_default, env_cfg.table_top_z), rot=(1.0, 0.0, 0.0, 0.0)
                 ),
             )
             for i in range(self.num_clips)

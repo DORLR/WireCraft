@@ -71,6 +71,7 @@ class SingleArmWireEnv(DirectRLEnv):
         self.task.post_clone()
         if self.wire_holder is not None:
             self.wire_holder.post_clone()
+        self._apply_color_overrides()
         if self.device == "cpu":
             self.scene.filter_collisions(global_prim_paths=[self.cfg.terrain.prim_path])
         light = sim_utils.DomeLightCfg(intensity=1500.0, color=(0.8, 0.8, 0.8))
@@ -78,6 +79,31 @@ class SingleArmWireEnv(DirectRLEnv):
         self.tiled_cameras = {}
         for name, cfg in self.cfg.camera_cfgs.items():
             self.tiled_cameras[name] = self.scene.sensors[name] = TiledCamera(cfg)
+
+
+    def _apply_color_overrides(self) -> None:
+        port_col = self.cfg.connector.port_color_override
+        sock_col = self.cfg.connector.socket_color_override
+        if port_col is None and sock_col is None:
+            return
+        from pxr import Gf, Usd, UsdGeom, Vt
+        from isaaclab.sim.utils import get_current_stage
+
+        stage = get_current_stage()
+        targets = []
+        if port_col is not None:
+            c = tuple(float(x) for x in port_col)
+            targets.extend([("wire/start_port", c), ("wire/end_port", c)])
+        if sock_col is not None:
+            targets.append(("socket", tuple(float(x) for x in sock_col)))
+        for env_idx in range(self.scene.cfg.num_envs):
+            for rel, col in targets:
+                root = stage.GetPrimAtPath(f"/World/envs/env_{env_idx}/{rel}")
+                if not root.IsValid():
+                    continue
+                for prim in Usd.PrimRange(root):
+                    if prim.IsA(UsdGeom.Gprim):
+                        UsdGeom.Gprim(prim).CreateDisplayColorAttr().Set(Vt.Vec3fArray([Gf.Vec3f(*col)]))
 
     # ---- shared state ------------------------------------------------------
     def sample_wire_pose(self, count: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -128,6 +154,7 @@ class SingleArmWireEnv(DirectRLEnv):
         if self.wire_holder is not None:
             self.wire_holder.track()
         self.arm.apply_action(self.actions, self.cfg.action_scale, self.cfg.fix_ee_orient, self.cfg.control_mode)
+        self.last_joint_targets = self.arm.targets.clone()
 
     def _get_observations(self) -> dict:
         self._update_state()

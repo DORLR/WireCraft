@@ -1,0 +1,51 @@
+# Exact CoRL 2026 ACT training configuration for Connector Insertion (W&B run ys7rp397).
+# Reported in Table 1 / Appendix Table 8 (64 rollouts = 4 seeds x 16 envs, 800 steps):
+#   100k checkpoint -> Reach (T2): 60.94 +/- 11.16%, Insert (T0): 29.69 +/- 9.24%
+#
+# Run inside the `lerobot` conda environment (LeRobot >= 0.4):
+#
+#   lerobot-train #     --dataset.repo_id=DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1 #     --dataset.image_transforms.enable=false #     --dataset.use_imagenet_stats=true #     --policy.type=act #     --policy.vision_backbone=resnet18 #     --policy.pretrained_backbone_weights=ResNet18_Weights.IMAGENET1K_V1 #     --policy.chunk_size=100 #     --policy.n_action_steps=50 #     --policy.n_obs_steps=1 #     --policy.dim_model=512 #     --policy.dim_feedforward=3200 #     --policy.n_heads=8 #     --policy.n_encoder_layers=4 #     --policy.n_decoder_layers=1 #     --policy.use_vae=true #     --policy.latent_dim=32 #     --policy.kl_weight=10.0 #     --policy.dropout=0.1 #     --policy.optimizer_lr=1e-5 #     --policy.optimizer_lr_backbone=1e-5 #     --policy.optimizer_weight_decay=1e-4 #     --policy.push_to_hub=false #     --batch_size=64 #     --steps=100000 #     --save_freq=5000 #     --seed=1000 #     --output_dir=outputs/train/corl2026_act_insertion
+#
+# Note: The same ACT hyperparameters were also used for 1-Clip Routing
+# (dataset: DORLR/Deformable-1Clip-Routing-v0-Scripted-1600, 64.06 +/- 11.16% at 100k)
+# and Straight-Channel Seating
+# (dataset: DORLR/Deformable-StraightChannel-v0-Scripted-1000-aug08-1, 18.80 +/- 7.65% at 100k).
+
+dataset:
+  repo_id: DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1
+  use_imagenet_stats: true
+  image_transforms:
+    enable: false
+
+policy:
+  type: act
+  n_obs_steps: 1
+  chunk_size: 100
+  n_action_steps: 50
+  vision_backbone: resnet18
+  pretrained_backbone_weights: ResNet18_Weights.IMAGENET1K_V1
+  replace_final_stride_with_dilation: false
+  pre_norm: false
+  dim_model: 512
+  n_heads: 8
+  dim_feedforward: 3200
+  feedforward_activation: relu
+  n_encoder_layers: 4
+  n_decoder_layers: 1
+  use_vae: true
+  latent_dim: 32
+  n_vae_encoder_layers: 4
+  temporal_ensemble_coeff: null
+  dropout: 0.1
+  kl_weight: 10.0
+  optimizer_lr: 1.0e-5
+  optimizer_lr_backbone: 1.0e-5
+  optimizer_weight_decay: 1.0e-4
+
+batch_size: 64
+steps: 100000
+save_freq: 5000
+seed: 1000
+optimizer:
+  grad_clip_norm: 10.0
+scheduler: null

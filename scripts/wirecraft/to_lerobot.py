@@ -32,6 +32,8 @@ def main():
     parser.add_argument("--image_writer_threads", type=int, default=4, help="Threads writing frames before encoding.")
     parser.add_argument("--push_to_hub", action="store_true", help="Upload the dataset to the Hugging Face Hub.")
     parser.add_argument("--private", action="store_true", help="Make the uploaded dataset private.")
+    parser.add_argument("--no_env_state", action="store_true",
+                        help="Omit observation.environment_state to match the minimal CoRL 2026 LeRobot feature schema.")
     args = parser.parse_args()
 
     from lerobot.datasets.lerobot_dataset import LeRobotDataset
@@ -42,15 +44,20 @@ def main():
     if not paths:
         raise SystemExit(f"No episodes in {args.episodes}.")
     first = np.load(paths[0])
-    action_names = [f"ee_d{a}" for a in ("x", "y", "z", "rx", "ry", "rz")][: first["action"].shape[1] - 1] + ["gripper"]
+    action_names = info.get("action_names") or (
+        [f"ee_d{a}" for a in ("x", "y", "z", "rx", "ry", "rz")][: first["action"].shape[1] - 1] + ["gripper"]
+    )
+    cam_prefix = info.get("camera_prefix", "")
     features = {
         "observation.state": {"dtype": "float32", "shape": first["state"].shape[1:], "names": info["state_names"]},
-        "observation.environment_state": {"dtype": "float32", "shape": first["environment_state"].shape[1:],
-                                          "names": None},
         "action": {"dtype": "float32", "shape": first["action"].shape[1:], "names": action_names},
     }
+    if not args.no_env_state:
+        features["observation.environment_state"] = {
+            "dtype": "float32", "shape": first["environment_state"].shape[1:], "names": None,
+        }
     for camera in info["cameras"]:
-        features[f"observation.images.{camera}"] = {
+        features[f"observation.images.{cam_prefix}{camera}"] = {
             "dtype": "video", "shape": first[f"image_{camera}"].shape[1:], "names": ["height", "width", "channels"],
         }
     dataset = LeRobotDataset.create(repo_id=args.repo_id, fps=info["fps"], features=features, root=args.root,
@@ -72,15 +79,20 @@ def main():
         provenance.append({"episode_index": kept, "source": os.path.basename(path),
                            "success": bool(episode["success"]), **source})
         task = str(episode["task"])
-        for t in range(len(episode["action"])):
+        states = episode["state"]
+        actions = episode["action"]
+        env_states = None if args.no_env_state else episode["environment_state"]
+        cam_arrays = {camera: episode[f"image_{camera}"] for camera in info["cameras"]}
+        for t in range(len(actions)):
             frame = {
-                "observation.state": episode["state"][t],
-                "observation.environment_state": episode["environment_state"][t],
-                "action": episode["action"][t],
+                "observation.state": states[t],
+                "action": actions[t],
                 "task": task,
             }
+            if env_states is not None:
+                frame["observation.environment_state"] = env_states[t]
             for camera in info["cameras"]:
-                frame[f"observation.images.{camera}"] = episode[f"image_{camera}"][t]
+                frame[f"observation.images.{cam_prefix}{camera}"] = cam_arrays[camera][t]
             dataset.add_frame(frame)
         dataset.save_episode()
         kept += 1

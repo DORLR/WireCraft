@@ -1,0 +1,36 @@
+# CoRL 2026 paper reproduction preset for 1-Clip Routing (UR5, FEM deformable).
+# Matches DORLR/Deformable-1Clip-Routing-v0-Scripted-1600 and the paper evaluation
+# overrides (Table 2 / Appendix F).
+#
+# Use with:
+#   --task WireCraft-UR5-Deformable-StackedCuboid-1Clip-Routing-v0
+#   --experiment scripts/wirecraft/experiments/corl2026_clip_routing.yaml
+env:
+  camera_resolution: 512
+  rerender_on_reset: true
+  robot:
+    # Paper Clip-Routing-1600 closed to 0.72 rad on the 6 mm FEM wire.
+    wire_gripper_closed_pos: 0.72
+    wire_pinch_opening: [-1.0, 0.35]
+  wire:
+    root_pos: [0.15, 0.0, 0.805]
+    randomize_xy: false
+    randomize_yaw: 0.0
+    randomize_tilt: 0.0
+    randomize_lift: [0.0, 0.0]
+  wire_holder:
+    enabled: true
+    trigger_distance: 0.030
+    port_clearance: 0.0
+    trigger_opening_rate: 0.05
+    sustain_steps: 1
+  gripper_close_on_wire: true
+  task:
+    randomize_clips: true
+    clip_y_default: 0.12
+    clip_y_range: 0.04
+    clip_yaw_range: 0.26179939  # +/-15 deg
+    clip_depth: 0.015
+    clip_wall_height: 0.0125
+  connector:
+    port_color_override: [0.0, 0.0, 1.0]

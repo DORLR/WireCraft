@@ -50,9 +50,27 @@ parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--cameras", nargs="*", default=[], help="Any of side, side2 and the robot's wrist cameras.")
 parser.add_argument("--camera_resolution", type=int, default=224)
 parser.add_argument("--only_success", action="store_true", help="Keep successful episodes only.")
+parser.add_argument("--action_encoding", default="env", choices=("env", "joint_target"),
+                    help="env: raw env action + 14-D state (default); joint_target: 7-D post-IK joint targets + 7-D joint state (CoRL 2026 schema).")
+parser.add_argument("--record_every_n", type=int, default=1,
+                    help="Subsample recorded frames every N control steps (use 2 for 30 fps from 60 Hz sim).")
+parser.add_argument("--camera_prefix", default="",
+                    help="Prefix prepended to camera keys when exporting to LeRobot (e.g. cam_ -> cam_side2, cam_color).")
+parser.add_argument("--paper_schema", action="store_true",
+                    help="Shorthand for CoRL 2026 paper dataset schema: --action_encoding joint_target --record_every_n 2 --camera_resolution 512 --camera_prefix cam_.")
 parser.add_argument("--output", required=True)
 AppLauncher.add_app_launcher_args(parser)
 args_cli, rest = parser.parse_known_args()
+if args_cli.paper_schema:
+    args_cli.action_encoding = "joint_target"
+    if "--record_every_n" not in ORIGINAL_ARGV:
+        args_cli.record_every_n = 2
+    if "--camera_resolution" not in ORIGINAL_ARGV:
+        args_cli.camera_resolution = 512
+    if "--camera_prefix" not in ORIGINAL_ARGV:
+        args_cli.camera_prefix = "cam_"
+if args_cli.record_every_n < 1:
+    raise SystemExit("--record_every_n must be >= 1.")
 SCRIPT_DEFAULTS = {"seed": parser.get_default("seed"), "scene": {"num_envs": parser.get_default("num_envs")}}
 if args_cli.cameras:
     args_cli.enable_cameras = True
@@ -78,8 +96,8 @@ TASK_TEXT = {
 class Recorder:
     """Per-env step buffers; an env's buffer is written once its rollout ends."""
 
-    def __init__(self, env, cameras):
-        self.env, self.cameras = env, cameras
+    def __init__(self, env, cameras, action_encoding: str = "env"):
+        self.env, self.cameras, self.action_encoding = env, cameras, action_encoding
         self.buffers = [self._empty() for _ in range(env.num_envs)]
 
     def _empty(self):
@@ -87,21 +105,36 @@ class Recorder:
 
     def state(self) -> torch.Tensor:
         arm = self.env.arm
+        if self.action_encoding == "joint_target":
+            return arm.joint_pos
         return torch.cat((arm.joint_pos, self.env.ee_local_pos, self.env.ee_local_quat), dim=-1)
+
+    def capture_obs(self, observation: torch.Tensor) -> dict:
+        """Snapshot state, policy observation, and camera frames BEFORE env.step()."""
+        images = {
+            c: self.env.tiled_cameras[c].data.output["rgb"][..., :3].to(torch.uint8).cpu().numpy()
+            for c in self.cameras
+        }
+        return {
+            "state": self.state().cpu().numpy(),
+            "observation": observation.cpu().numpy(),
+            "images": images,
+        }
+
+    def commit(self, snap: dict, action: torch.Tensor, recording: torch.Tensor) -> None:
+        """Append a pre-step observation snapshot paired with its executed action."""
+        action_np = action.cpu().numpy()
+        for i in recording.nonzero().flatten().tolist():
+            buffer = self.buffers[i]
+            buffer["state"].append(snap["state"][i])
+            buffer["environment_state"].append(snap["observation"][i])
+            buffer["action"].append(action_np[i])
+            for camera in self.cameras:
+                buffer[f"image_{camera}"].append(snap["images"][camera][i])
 
     def add(self, observation: torch.Tensor, action: torch.Tensor, recording: torch.Tensor) -> None:
         """Store the observation seen before ``action`` was applied, for the envs still recording."""
-        state, images = self.state().cpu().numpy(), {}
-        for camera in self.cameras:
-            images[camera] = self.env.tiled_cameras[camera].data.output["rgb"][..., :3].to(torch.uint8).cpu().numpy()
-        observation, action = observation.cpu().numpy(), action.cpu().numpy()
-        for i in recording.nonzero().flatten().tolist():
-            buffer = self.buffers[i]
-            buffer["state"].append(state[i])
-            buffer["environment_state"].append(observation[i])
-            buffer["action"].append(action[i])
-            for camera in self.cameras:
-                buffer[f"image_{camera}"].append(images[camera][i])
+        self.commit(self.capture_obs(observation), action, recording)
 
     def take(self, env_id: int) -> dict:
         buffer, self.buffers[env_id] = self.buffers[env_id], self._empty()
@@ -116,6 +149,8 @@ def main():
     if args_cli.cameras:
         env_cfg.enable_cameras, env_cfg.cameras = True, list(args_cli.cameras)
         env_cfg.camera_resolution, env_cfg.render_stride = args_cli.camera_resolution, 1
+        if args_cli.paper_schema:
+            env_cfg.rerender_on_reset = True
     agent_cfg = compose.compose_agent_cfg(spec, args_cli.experiment)
     # Typed flags (--num_envs, --seed, --device, ...) and env.*/agent.* tokens, exactly as in training.
     compose.apply_cli(env_cfg, agent_cfg, compose.parse_cli_overrides(rest),
@@ -147,8 +182,10 @@ def main():
         rl_policy = runner.get_inference_policy(device=base.device)
 
     saved, attempted, successes = 0, 0, 0
+    stride = args_cli.record_every_n
+    use_jt = args_cli.action_encoding == "joint_target"
     while saved < args_cli.num_episodes and attempted < 10 * args_cli.num_episodes:
-        recorder = Recorder(base, args_cli.cameras)
+        recorder = Recorder(base, args_cli.cameras, action_encoding=args_cli.action_encoding)
         count = base.num_envs
         success = torch.zeros(count, dtype=torch.bool, device=base.device)
         faulted = torch.zeros_like(success)
@@ -157,11 +194,14 @@ def main():
                 base.reset()
                 policy = make_policy(base)
                 recording = torch.ones_like(success)
-                for _ in range(policy.max_steps):
+                for step_i in range(policy.max_steps):
                     observation = base.task.observations()
                     action = policy.act()
-                    recorder.add(observation, action.clamp(-1.0, 1.0), recording)
+                    snap = recorder.capture_obs(observation) if (step_i % stride == 0) else None
                     _, _, _, _, extras = base.step(action)
+                    if snap is not None:
+                        rec_act = base.last_joint_targets if use_jt else action.clamp(-1.0, 1.0)
+                        recorder.commit(snap, rec_act, recording)
                     policy.observe(extras)
                     recording &= policy.phase != policy.done_phase
                     if policy.finished:
@@ -172,10 +212,13 @@ def main():
             else:
                 observation, _ = wrapped.reset()
                 recording = torch.ones_like(success)
-                for _ in range(int(base.max_episode_length) + 5):
+                for step_i in range(int(base.max_episode_length) + 5):
                     action = rl_policy(observation)
-                    recorder.add(observation, action.clamp(-1.0, 1.0), recording)
+                    snap = recorder.capture_obs(observation) if (step_i % stride == 0) else None
                     observation, _, dones, _ = wrapped.step(action)
+                    if snap is not None:
+                        rec_act = base.last_joint_targets if use_jt else action.clamp(-1.0, 1.0)
+                        recorder.commit(snap, rec_act, recording)
                     success |= base.extras["is_success"].bool() & recording
                     faulted |= base.faulted & recording
                     recording &= ~dones.bool()
@@ -238,13 +281,25 @@ def config_hash(cfg) -> str:
 def data_schema(base, spec, mode: str, task_text: str) -> dict:
     """What every episode in the folder has in common: the format and the env that produced it."""
     cameras = list(args_cli.cameras)
+    if args_cli.action_encoding == "joint_target":
+        joint_names = [base.arm.robot.joint_names[i] for i in base.arm.joint_ids]
+        state_names = list(joint_names)
+        action_names = list(joint_names)
+        action_dim = len(joint_names)
+    else:
+        state_names = [f"joint_{i}" for i in range(base.arm.joint_pos.shape[1])] + [
+            "ee_x", "ee_y", "ee_z", "ee_qw", "ee_qx", "ee_qy", "ee_qz"
+        ]
+        action_dim = int(base.cfg.action_space)
+        action_names = [f"ee_d{a}" for a in ("x", "y", "z", "rx", "ry", "rz")][: action_dim - 1] + ["gripper"]
     return {
         "format": "wirecraft-episodes-v1", "task": args_cli.task, "task_text": task_text, "policy": args_cli.policy,
-        "mode": mode, "robot": spec.robot, "fps": round(1.0 / base.step_dt), "cameras": cameras,
+        "mode": mode, "robot": spec.robot, "fps": round(1.0 / (base.step_dt * args_cli.record_every_n)),
+        "record_every_n": args_cli.record_every_n, "action_encoding": args_cli.action_encoding,
+        "cameras": cameras, "camera_prefix": args_cli.camera_prefix,
         "camera_resolution": [base.cfg.camera_resolution] * 2 if cameras else None,
-        "state_names": [f"joint_{i}" for i in range(base.arm.joint_pos.shape[1])]
-        + ["ee_x", "ee_y", "ee_z", "ee_qw", "ee_qx", "ee_qy", "ee_qz"],
-        "environment_state_dim": int(base.cfg.observation_space), "action_dim": int(base.cfg.action_space),
+        "state_names": state_names, "action_names": action_names,
+        "environment_state_dim": int(base.cfg.observation_space), "action_dim": action_dim,
         "config_hash": config_hash(base.cfg),
     }
 

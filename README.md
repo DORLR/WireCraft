@@ -1,4 +1,39 @@
-# WireCraft
+# WireCraft (`corl2026-repro` branch)
+
+> **CoRL 2026 Paper Reproduction Branch** — This branch preserves `main` untouched while adding
+> opt-in CoRL 2026 compatibility presets (`scripts/wirecraft/experiments/corl2026_*.yaml`),
+> 30 FPS / 7-D joint-target dataset export (`--paper_schema`), exact ACT training hyperparameters
+> (`scripts/wirecraft/configs/corl2026_act_insertion.yaml`), and a closed-loop LeRobot evaluator
+> (`scripts/wirecraft/eval_lerobot.py`).
+>
+> **Full guide, datasets, and exact commands:** [`docs/wirecraft/CORL2026_REPRO.md`](docs/wirecraft/CORL2026_REPRO.md).
+> For the latest benchmark environments and active development, see the [`main`](https://github.com/DORLR/WireCraft/tree/main) branch.
+
+### Quick Links — CoRL 2026 HuggingFace Datasets (LeRobot v3.0, 30 FPS, 7-D Joint Targets)
+
+- **Simulation IL/VLA:**
+  - Connector Insertion (1,000 eps): [`DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1`](https://huggingface.co/datasets/DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1)
+  - 1-Clip Routing (1,600 eps): [`DORLR/Deformable-1Clip-Routing-v0-Scripted-1600`](https://huggingface.co/datasets/DORLR/Deformable-1Clip-Routing-v0-Scripted-1600)
+  - Straight-Channel Seating (1,000 eps): [`DORLR/Deformable-StraightChannel-v0-Scripted-1000-aug08-1`](https://huggingface.co/datasets/DORLR/Deformable-StraightChannel-v0-Scripted-1000-aug08-1)
+- **Real-World & Sim-to-Real Validation (Section 6 / Appendix Table `tab:real_data_sources`):**
+  - Insertion: [`ur5_camera_ready_insertion_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task) (50 real), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_insertion_task_sim_rl) (200)
+  - 1-Clip Routing: [`ur5_camera_ready_routing_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task) (51 real), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_routing_task_sim_rl) (200)
+  - Straight-Channel Seating: [`ur5_camera_ready_seating_task`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task) (50 real), [`..._sim_scripted`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task_sim_scripted) (200), [`..._sim_rl`](https://huggingface.co/datasets/DORLR/ur5_camera_ready_seating_task_sim_rl) (200)
+
+### Quick Start — Closed-Loop LeRobot ACT Evaluation
+
+```bash
+python scripts/wirecraft/eval_lerobot.py --headless \
+  --task WireCraft-UR5-Deformable-StackedCuboid-Insertion-v0 \
+  --experiment scripts/wirecraft/experiments/corl2026_insertion.yaml \
+  --checkpoint <path_or_hf_repo_id> \
+  --lerobot_python /path/to/lerobot/bin/python \
+  --num_envs 16 --seeds 1000,2000,3000,4000 --episode_length 800 \
+  --output out/eval_corl2026_insertion.json
+```
+
+---
+
 
 **A Simulation Benchmark for Industrial DLO Manipulation**
 

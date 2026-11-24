@@ -51,6 +51,10 @@ class ConnectorCfg:
     port_dynamic_friction: float = 2.0
     socket_color: tuple[float, float, float] = (0.8, 0.0, 0.0)
     socket_inner_color: tuple[float, float, float] = (0.8, 0.0, 0.0)
+    port_color_override: tuple[float, float, float] | None = None
+    """Optional RGB displayColor override applied to port USD prims after scene cloning (e.g. CoRL 2026 blue)."""
+    socket_color_override: tuple[float, float, float] | None = None
+    """Optional RGB displayColor override applied to socket USD prims after scene cloning (e.g. CoRL 2026 red)."""
 
     def port_cfg(self) -> WirePortCfg:
         """Endpoint config shared by the start and end port of both backends."""

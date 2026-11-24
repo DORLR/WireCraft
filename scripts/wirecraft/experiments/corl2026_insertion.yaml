@@ -1,0 +1,24 @@
+# CoRL 2026 paper reproduction preset for Connector Insertion (UR5, FEM deformable).
+# Matches DORLR/Deformable-StackedCuboid-Insertion-v0-Scripted-1000-apr29-1 and the
+# paper evaluation overrides (Table 1 / Appendix E).
+#
+# Use with:
+#   --task WireCraft-UR5-Deformable-StackedCuboid-Insertion-v0
+#   --experiment scripts/wirecraft/experiments/corl2026_insertion.yaml
+env:
+  camera_resolution: 512
+  rerender_on_reset: true
+  wire:
+    root_pos: [0.15, 0.0, 0.805]
+    randomize_xy: true
+    randomize_xy_range: [0.1, 0.1]
+    randomize_yaw: 0.62831853   # +/-36 deg (pi * 0.2)
+    randomize_tilt: 0.31415927  # +/-18 deg roll & pitch (pi/2 * 0.2)
+    randomize_lift: [0.06, 0.11]
+  task:
+    randomize_socket: true
+  connector:
+    socket_clearance: 0.003
+    # Paper datasets were rendered with vivid primary colors (no ColorJitter during ACT training).
+    port_color_override: [0.0, 0.0, 1.0]
+    socket_color_override: [0.8, 0.0, 0.0]

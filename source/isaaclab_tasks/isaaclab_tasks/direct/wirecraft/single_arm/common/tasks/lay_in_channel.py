@@ -162,6 +162,8 @@ class LayInChannelCfg:
     bend_angle_deg: float = 10.0
     curve_segments: int = 40
     success_fraction: float = 0.8
+    channel_color: tuple[float, float, float] | None = None
+    """Optional RGB diffuse color override for channel walls (CoRL 2026 used red (1.0, 0.0, 0.0))."""
 
     anchor_far_port: bool = True
     """Start the far port at the chain's entry, clamped where the wire backend can hold it."""
@@ -200,6 +202,11 @@ class LayInChannelCfg:
 
     def resolve(self, env_cfg) -> None:
         count = self.num_modules or (3 if self.channel_type == "straight" else 5)
+        spawn_kwargs = {}
+        if self.channel_color is not None:
+            spawn_kwargs["visual_material"] = sim_utils.PreviewSurfaceCfg(
+                diffuse_color=tuple(float(x) for x in self.channel_color), roughness=0.65
+            )
         spawn = ChannelCfg(
             channel_type=self.channel_type,
             length=self.module_length or PRINTED_MODULE_LENGTH[self.channel_type] * self.module_scale,
@@ -209,6 +216,7 @@ class LayInChannelCfg:
             bend_angle_deg=self.bend_angle_deg,
             curve_segments=self.curve_segments,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True, disable_gravity=True),
+            **spawn_kwargs,
         )
         self.module_poses, self.line_xy = chain_layout(spawn, count)
         cx, cy = self.start_xy
