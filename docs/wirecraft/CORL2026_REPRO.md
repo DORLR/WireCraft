@@ -199,7 +199,9 @@ python scripts/wirecraft/eval_lerobot.py --headless \
 
 ### Verified Closed-Loop Reference Results on `corl2026-repro`
 
-Measured on Isaac Sim 5.0 / RTX 5090 using the exact commands and published HF checkpoints above:
+Measured on **Isaac Sim 5.1.0-rc.19** (`5.1.0-rc.19+release.26219.9c81211b.gl`) / RTX 5090 Laptop GPU / `lerobot 0.5.2` (`huggingface/lerobot@580d818a`) using the exact commands and published HF checkpoints above:
+
+> **Isaac Sim version note:** Use **Isaac Sim 5.1** (not 5.0, where kinematic rigid-body poses written during `reset()` can lag behind PhysX in Hydra rendering). Note that Isaac Sim 5.1's Kit startup banner still prints `Kit/Isaac-Sim/5.0/user.config.json` and writes logs under `Kit/Isaac-Sim/5.0/`; verify your actual version via the `VERSION` file in the Isaac Sim installation directory.
 
 | Task | Published Checkpoint | Rollouts | Measured on `corl2026-repro` | Paper Table |
 | --- | --- | --- | --- | --- |
